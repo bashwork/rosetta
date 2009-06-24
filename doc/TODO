@@ -1,0 +1,26 @@
+#---------------------------------------------------------------------------# 
+# Current Work In Progress
+#---------------------------------------------------------------------------# 
+** Message Base **
+
+  - allow message inheritence
+  - cache already built messages
+
+** Message **
+
+  - Meta fields
+  - figure out naming
+  - total_size
+  - assign field values in __init__
+
+** Fields **
+
+  - Add enumeration type
+  - figure out naming
+  - add optional flag
+  - add repeated flag
+
+** Serializers **
+
+  - Make serializer base class
+  - convert yaml, json, xml, binary, soap
