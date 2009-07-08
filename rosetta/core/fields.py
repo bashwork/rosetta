@@ -16,21 +16,59 @@ an example of the intended useage::
         flag     = BoolField(name='Symbol')
         type     = StringField(size=4, name='Type', const=True, value='AON')
 
-..:todo: Maybe an enumeration field
+Types
+--------------------------
+
+Instead of creating a generic field and having to pass the type
+each time, we create base classes that set the type for us. So,
+
+    StringField(Field):
+        def __init__(self, *args, **kwargs):
+            self.type = str
+
+For the value of the type we require a type object (or functor) that
+can convert an encoded type (usually a string) back to the given type.
+For the main types (string, int, bool, etc) we simply use the python
+types.  In the future we may need more complicated functors (Date,
+Enumeration, Time, etc).
+
+Const
+--------------------------
+
+By setting the const field to true, the current value will be unable
+to be changed. This is useful for things like message IDs, message
+sentinals, or version numbers.
+
+Optional
+--------------------------
+
+By setting the optional flag to true, the field will not be encoded
+unless it's value has changed from the default value.
+
+Repeat
+--------------------------
+
+By setting the repeat field to true, the value can be set to a list
+of values instead of a single value and will be treated as multiple
+fields of the same type.
+
+.. todo::
+
+   Possible fields we need to add are choice, enumeration, bit-field.
 '''
+from rosetta.core.exceptions import FieldDoesNotExist
+
+#---------------------------------------------------------------------------# 
+# Logger
+#---------------------------------------------------------------------------# 
+import logging
+_logger = logging.getLogger('rosetta.core.fields')
 
 #--------------------------------------------------------------------------------#
 # Helper Classes
 #--------------------------------------------------------------------------------#
 class NOT_PROVIDED:
     ''' Class used to flag invalid values '''
-    pass
-
-class FieldDoesNotExist(Exception):
-    '''
-    Raised when attempting to reference a field that
-    does not exist on the current message
-    '''
     pass
 
 #--------------------------------------------------------------------------------#
@@ -59,6 +97,7 @@ class Field(object):
         self.default      = kwargs.get('default', NOT_PROVIDED)
         self.const        = kwargs.get('const', False)
         self.optional     = kwargs.get('optional', False)
+        self.repeated     = kwargs.get('repeated', False)
         self.name         = kwargs.get('name', '')
         self.verbose_name = kwargs.get('verbose_name', self.name)
         self.encoded_name = kwargs.get('encoded_name', self.name)
@@ -84,6 +123,12 @@ class Field(object):
         :return: The field value is string form
         '''
         return str(self.value)
+
+    def is_required(self):
+        ''' Check if this is a required field
+        :return: True if it is, False otherwise
+        '''
+        return True if not self.optional else self.value != self.default
 
     def has_default(self):
         ''' Check if we have a default value
@@ -243,10 +288,3 @@ class DecimalField(Field):
         '''
         return 'decimal'
 
-#--------------------------------------------------------------------------------#
-# Exported Symbols
-#--------------------------------------------------------------------------------#
-__all__ = [
-    'PaddingField', 'StringField', 'CharField', 'IntField',
-    'BoolField', 'FloatField', 'DecimalField',
-]

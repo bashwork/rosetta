@@ -19,7 +19,13 @@ try:
 except NameError:
     from sets import Set as set # Python 2.3 fallback.
 
-from rosetta.options import Options
+from rosetta.core.options import Options
+
+#---------------------------------------------------------------------------# 
+# Logger
+#---------------------------------------------------------------------------# 
+import logging
+_logger = logging.getLogger('rosetta.core.message')
 
 class MessageBase(type):
     ''' Metaclass use to build a message
@@ -35,29 +41,29 @@ class MessageBase(type):
         :param bases: The subclasses of the class
         :param attrs: The class attributes
         '''
+        # if not a subclass of message, simply instantiate
         super_new = super(MessageBase, cls).__new__
-        # If not a subclass of message, simply instantiate it
         parents = [base for base in bases if isinstance(base, MessageBase)]
         if not parents:
             return super_new(cls, name, bases, attrs)
 
-        # Create the class.
+        # create the class.
         module = attrs.pop('__module__')
         new_class = super_new(cls, name, bases, {'__module__': module})
 
-        # Extract current Meta information
+        # extract current Meta information
         attr_meta = attrs.pop('Meta', None)
         if not attr_meta:
             meta = getattr(new_class, 'Meta', None)
         else: meta = attr_meta
         new_class.add_to_class('_meta', Options(meta))
 
-        # Bail out early if we have already created this class.
+        # bail out early if we have already created this class.
         #m = get_model(new_class._meta.app_label, name, False)
         #if m is not None:
         #    return m
 
-        # Add all fields to the class.
+        # add all fields to the class.
         for obj_name, obj in attrs.items():
             new_class.add_to_class(obj_name, obj)
 
@@ -112,19 +118,3 @@ class Message(object):
         '''
         method.deserialize(self._meta.fields(), input)
 
-from rosetta.fields import *
-
-class Example(Message):
-    broker  = StringField(size=8,  name='Broker')
-    account = StringField(size=16, name='Account')
-    wtn     = StringField(size=16, name='WTN')
-    type    = StringField(size=4,  name='Type')
-
-    class Meta:
-        ''' Decide what meta options we support
-        :total_size: If they want the message chomped or padded more
-        :message_name: The verbose name to use in lue of the class name
-        '''
-        total_size   = 200 
-        verbose_name = 'Example Message' 
-        encoded_name = 'example' 

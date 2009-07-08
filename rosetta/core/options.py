@@ -9,7 +9,13 @@ We should probobly set the groundwork now for doing inheritable
 messages, but we need to get the base stuff right first.
 '''
 from bisect import bisect
-from rosetta.fields import FieldDoesNotExist
+from rosetta.core.exceptions import FieldDoesNotExist
+
+#---------------------------------------------------------------------------# 
+# Logger
+#---------------------------------------------------------------------------# 
+import logging
+_logger = logging.getLogger('rosetta.core.options')
 
 #--------------------------------------------------------------------------------#
 # Allowed Meta Values 
