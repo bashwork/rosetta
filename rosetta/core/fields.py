@@ -20,17 +20,25 @@ Types
 --------------------------
 
 Instead of creating a generic field and having to pass the type
-each time, we create base classes that set the type for us. So,
+each time, we create base classes that set the type for us. So::
 
     StringField(Field):
         def __init__(self, *args, **kwargs):
             self.type = str
 
-For the value of the type we require a type object (or functor) that
-can convert an encoded type (usually a string) back to the given type.
+For the value of the type we require a type object that can convert
+an encoded type (usually a string) back to the given type.
 For the main types (string, int, bool, etc) we simply use the python
 types.  In the future we may need more complicated functors (Date,
-Enumeration, Time, etc).
+Enumeration, Time, etc)::
+
+    class NewType(type):
+
+        def __call__(self, value):
+
+    NewTypeField(Field):
+        def __init__(self, *args, **kwargs):
+            self.type = 
 
 Const
 --------------------------

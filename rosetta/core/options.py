@@ -106,12 +106,13 @@ class Options(object):
             cache = self._name_map
         except AttributeError:
             cache = self.init_name_map()
-        names = cache.keys()
+        names = cache
         names.sort()
-        return names # django does elimination of internal names starting with +
+        return names
 
     def init_name_map(self):
         ''' Initalizes the field print name lookup
         :return: The built name cache
         '''
-        pass
+        self._name_map = [f.name for f in self._fields()]
+        return self._name_map
